@@ -7,6 +7,7 @@ import pickle
 import os
 
 JOB_CACHE_MIN = 20
+JOB_CACHE_PROCESSED_MIN = 5
 LIKES_MIN = 10
 
 class JobController:
@@ -16,6 +17,7 @@ class JobController:
         self.model = None
         self._liked_jobs_cache: list[dict] | None = None
         self._jobs_cache: list[Job]
+        self._processed_jobs_cache: list[Job] = []
         self._load_model()
 
     def get_liked(self) -> list[dict]:
@@ -31,6 +33,8 @@ class JobController:
         if job_id is None:
             raise ValueError("Job ID not found in database")
         
+        self._processed_jobs_cache.remove(self.model.current_job)
+        
         self.db.add_like(self.user.user_id, job_id, swipe_label)
 
         self.model.give_feedback(swipe_label)
@@ -43,15 +47,15 @@ class JobController:
 
     def get_job(self) -> Job:
         """Returns predicted job"""
-        if self._jobs_cache < JOB_CACHE_MIN:
+        if len(self._jobs_cache) < JOB_CACHE_MIN or len(self._processed_jobs_cache) < JOB_CACHE_PROCESSED_MIN:
             self._refresh_job_cache()
 
         if len(self.get_liked()) >= LIKES_MIN:
-            ranked_jobs = self._rank_jobs(self._jobs_cache)
+            ranked_jobs = self._rank_jobs(self._processed_jobs_cache)
             selected_job = ranked_jobs[0]
         else:
             # Random selection for cold start
-            selected_job = random.choice(self._jobs_cache)
+            selected_job = random.choice(self._processed_jobs_cache)
         
         self.model.current_job = selected_job
 
@@ -61,13 +65,17 @@ class JobController:
     def _refresh_job_cache(self) -> None:
         """Forces a cache update"""
         prefrences = self.user.get_preferences(self.user.user_id)
-        self._jobs_cache = get_jobs(prefrences["preferred_title"], prefrences["preferred_location"])
+        self._jobs_cache = get_jobs(job_title=prefrences["preferred_title"], job_location=prefrences["preferred_location"], number_of_results=JOB_CACHE_MIN)
+        for i in JOB_CACHE_PROCESSED_MIN:
+            self._jobs_cache[i].get_keywords()
+            self._processed_jobs_cache.append(self._jobs_cache[i])
+            self._jobs_cache.pop(i)
 
     def _rank_jobs(self, jobs: list[Job]) -> list[Job]:
         """Returns a ranked list of jobs based on user preferences"""
         return sorted(
             jobs,
-            key=lambda job: self.model.predict(job),
+            key=lambda job: self.model.predict(job.keywords),
             reverse=True
         )
     
@@ -86,11 +94,11 @@ class JobController:
                 raise FileNotFoundError("No model path found for user")
             
             if not os.path.exists(model_path):
-                raise FileNotFoundError(f"Model file not found at {model_path}")
+                self.model = LikeModel()
+                return True
             
             with open(model_path, 'rb') as f:
-                loaded_model = pickle.load(f)
-                self.model = LikeModel(None, loaded_model)
+                self.model = pickle.load(f)
             return True
             
         except Exception as e:

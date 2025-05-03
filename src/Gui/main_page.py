@@ -3,12 +3,17 @@ from nicegui.events import KeyEventArguments
 import asyncio
 
 from src.Model.Gemini import Gemini
+from src.Controller.JobController import JobController
 
 @ui.page("/main")
 def main_page():
     ui.page_title('Pursuit - Swipe into something better!')
 
+        
+
     gem = Gemini()
+    jc = JobController()
+
     
     ui.add_head_html('''
         <style>
@@ -76,31 +81,47 @@ def main_page():
                     setTimeout(() => {{ panel.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s ease-in-out'; }}, 10);
                 }}, 500);
             """)
+        
+        #get new job
+        jc.record_like(direction == 'right')
+        new_job = jc.get_job()
+        unwrap_job(new_job)
+        gem.update_job_description(new_job.job_description)
             
 
     with ui.card().classes('swipe-card').props('id=swipe-card'):
         # Title
         with ui.row():
             ui.icon('work', color='primary').classes('text-4xl')
-            ui.label('Title').classes('text-3xl')
+            title = ui.label('Title').classes('text-3xl')
         ui.space() 
         # Description
         with ui.row():
             ui.icon('description', color='primary').classes('text-4xl')
-            ui.label('Description\n').classes('text-3xl')
+            description = ui.label('Description\n').classes('text-3xl')
             with ui.scroll_area().style('width: 460px; height: 200px;'):
                 ui.label('...\n' * 400)
         ui.space() 
         # Company
         with ui.row():
             ui.icon('factory', color='primary').classes('text-4xl')
-            ui.label('Company').classes('text-3xl')
+            company = ui.label('Company').classes('text-3xl')
         ui.space()  
         # Location
         with ui.row():
             ui.icon('emoji_transportation', color='primary').classes('text-4xl')
-            ui.label('Location').classes('text-3xl')
+            location = ui.label('Location').classes('text-3xl')
         ui.space() 
+
+    def unwrap_job(job):
+        title.text = job.job_title
+        description.text = job.job_description
+        company.text = job.job_employer
+        location.text = job.job_location
+
+    init_job = jc.get_job()
+    unwrap_job(init_job)
+    gem.update_job_description(init_job.job_description)
     
     buttons = ui.card().style(
         'position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 550px; height: 100px; background: none; box-shadow: none; border: none;'
