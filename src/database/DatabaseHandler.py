@@ -134,7 +134,6 @@ class DatabaseHandler:
                 return cursor.rowcount > 0
 
 
-
     def get_liked_jobs(self, user_id: int) -> list[dict]:
         """Returns all jobs liked by a user"""
         with self._get_connection() as conn:
@@ -155,9 +154,6 @@ class DatabaseHandler:
                     ON DUPLICATE KEY UPDATE swipe_time = CURRENT_TIMESTAMP
                 """, (user_id, job_title, job_employer, job_location, job_url))
                 conn.commit()
-
-
-
 
 
     def get_model_path(self, user_id: int) -> str | None:

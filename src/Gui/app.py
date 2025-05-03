@@ -8,7 +8,6 @@ class App:
     def __init__(self):
         load_dotenv()
 
-
         self.db = DatabaseHandler(
             host="localhost",
             database="pursuit",
