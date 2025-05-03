@@ -45,11 +45,7 @@ def login():
         if check:
             ui.navigate.to('/main')
         else:
-            with ui.dialog() as dialogue, ui.card():
-                ui.label("Incorrect username or password")
-                ui.button('Close', on_click=dialogue.close)
-                username.value = ''
-                password.value = ''
+            ui.notify('Invalid username or password', color='red')
     
     with ui.card().classes('absolute-center'):
         username = ui.input('Username')

@@ -15,7 +15,6 @@ def main_page():
     gem = Gemini()
     jc = app.jobs
     jc._load_model()
-
     
     ui.add_head_html('''
         <style>
@@ -32,8 +31,6 @@ def main_page():
         </style>
     ''')
 
-
-    
     
 
     async def handle_left():
@@ -84,7 +81,7 @@ def main_page():
                 }}, 500);
             """)
         
-        #get new job
+        await asyncio.sleep(0.3)
         jc.record_like(direction == 'right', jc.model.current_job.job_title, jc.model.current_job.job_employer, jc.model.current_job.job_location, jc.model.current_job.job_url)
         new_job = jc.get_job()
         unwrap_job(new_job)
