@@ -4,7 +4,6 @@ import asyncio
 
 @ui.page("/main")
 def main_page():
-    ui.page_title('Pursuit - Swipe into something better!')
     ui.add_head_html('''
         <style>
             body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}
@@ -20,17 +19,29 @@ def main_page():
         </style>
     ''')
 
-    async def on_up():
+
+    
+    
+
+    async def handle_left():
         ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #53ff40);}</style>')
         await move_panel('right')
         await asyncio.sleep(0.5)
         ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
 
-    async def on_down():
+    async def handle_right():
         ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #ff0303);}</style>')
         await move_panel('left')
         await asyncio.sleep(0.5)
         ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
+
+    async def handle_key(event: KeyEventArguments):
+        if event.key == 'ArrowLeft':
+            await handle_right()
+        elif event.key == 'ArrowRight':
+            await handle_left()
+
+    keyboard = ui.keyboard(on_key=handle_key)
 
     async def move_panel(direction):
         if direction == 'left':
@@ -88,10 +99,14 @@ def main_page():
     buttons = ui.card().style(
         'position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 550px; height: 100px; background: none; box-shadow: none; border: none;'
     )
+
     with buttons:
         with ui.row().style('justify-content: space-between; width: 100%; padding: 0 20px;'):
-            ui.button(icon='thumb_down', on_click=on_down).props('icon-color: #F44336;')  # Left-aligned button
-            ui.button(icon='thumb_up', on_click=on_up).props('icon-color: #4CAF50;')  # Right-aligned button
+            ui.button(icon='thumb_down', on_click=handle_right).props('icon-color: #F44336;')  # Left-aligned button
+            ui.button(icon='thumb_up', on_click=handle_left).props('icon-color: #4CAF50;')  # Right-aligned button
+
+    def toggle_sidebar():
+            drawer.toggle()
             
     with ui.row().classes('w-full border items-center justify-between').style('background: none; box-shadow: none; border: none;'): 
         with ui.button(icon='menu'):
@@ -108,14 +123,11 @@ def main_page():
                 ui.separator()
                 ui.menu_item('Close', menu.close)
         ui.image('./src/Gui/icons/logo.png').style('width: 90px; height: 30px;')
+        ui.space()
+        ui.button('Liked Jobs', on_click=toggle_sidebar)
 
-
-    with ui.drawer(side='right') as drawer:
+    with ui.drawer(side='right', value=False) as drawer:
         ui.menu_item('Menu item 1')
         ui.menu_item('Menu item 2')
         ui.menu_item('Menu item 3')
-        ui.separator()
-        ui.menu_item('Close', menu.close)
-    def toggle_sidebar():
-        drawer.toggle()
-    ui.button('Liked Jobs', on_click=toggle_sidebar).classes('absolute top-0 right-0 p-4')
+    
