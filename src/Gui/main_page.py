@@ -2,9 +2,13 @@ from nicegui import app, ui
 from nicegui.events import KeyEventArguments
 import asyncio
 
+from src.Model.Gemini import Gemini
+
 @ui.page("/main")
 def main_page():
 
+    gem = Gemini()
+    
     ui.add_head_html('''
         <style>
             body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}
@@ -107,8 +111,50 @@ def main_page():
             ui.button(icon='thumb_up', on_click=handle_left).props('icon-color: #4CAF50;')  # Right-aligned button
 
 
-    def toggle_sidebar():
+
+    def chat_input_submitted(value: str):
+        chat_messages = []
+
+        #update gem with the newest job description
+        #gem.update_job_description(value)
+
+        chat_input = value
+        resp = gem.generate_content(chat_input)  # Generate response
+        chat_messages.append(f"Gemini: {resp}")
+        chat_label.text = "\n".join(chat_messages)  # Update the chat label
+
+    # Define a toggle function for the chat drawer
+    def toggle_chat_drawer():
+        if (drawer.value):
             drawer.toggle()
+        else:
+            chat_drawer.toggle()
+
+    # Replace the chat card with a drawer
+    # Replace the chat card with a larger drawer
+    with ui.drawer(side='right', value=False).props('id=chat-drawer').style('width: 500px; height: 100%;') as chat_drawer:
+        # Chat Title
+        with ui.row():
+            ui.icon('chat', color='primary').classes('text-4xl')
+            ui.label('Gemini Chat').classes('text-3xl')
+        ui.space()
+        # Chat Messages
+        with ui.scroll_area().style('width: 100%; height: 500px; border: 1px solid #ccc; padding: 10px;'):
+            chat_label = ui.label("Chat messages will appear here... Ask gemini anything about the provided job!").style("height:100%").classes('text-lg')  # Label to display messages
+        ui.space()
+        # Chat Input
+        with ui.column().style('justify-content: space-between; width: 100%; padding: 10px;'):
+            chat_input = ui.input(placeholder='Type your message here...').props('outlined').style('flex: 1; margin-right: 10px; width: 100%; height: 100%;')
+            ui.button('Send', on_click=lambda: chat_input_submitted(chat_input.value)).props('icon-color: #4CAF50;').style('width: 100%; height: 100%;')
+        # Add a button to toggle the chat drawer
+
+
+
+    def toggle_sidebar():
+            if chat_drawer.value:
+                chat_drawer.toggle()
+            else:
+                drawer.toggle()
             
     with ui.row().classes('w-full border items-center justify-between').style('background: none; box-shadow: none; border: none;'): 
         with ui.button(icon='menu'):
@@ -126,10 +172,14 @@ def main_page():
                 ui.menu_item('Close', menu.close)
         ui.image('./src/Gui/icons/logo.png').style('width: 90px; height: 30px;')
         ui.space()
+        ui.button('Open Chat', on_click=toggle_chat_drawer)
+
         ui.button('Liked Jobs', on_click=toggle_sidebar)
 
     with ui.drawer(side='right', value=False) as drawer:
         ui.menu_item('Menu item 1')
         ui.menu_item('Menu item 2')
         ui.menu_item('Menu item 3')
+
+
     
