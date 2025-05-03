@@ -78,7 +78,7 @@ class JobController:
             key=lambda job: self.model.predict(job.keywords),
             reverse=True
         )
-    
+
 
 
     def _load_model(self) -> bool:
@@ -109,19 +109,19 @@ class JobController:
         """Saves the current model to the user-specific path in database.
         Returns True if successful, False otherwise."""
         try:
-            user_id = self.user.current_user_id
+            user_id = self.user.user_id
             if user_id is None:
                 raise ValueError("No authenticated user")
             
             model_path = self.db.get_model_path(user_id)
             if not model_path:
-                model_path = os.path.abspath(f"models/user_{user_id}_model.pkl")
+                model_path = os.path.abspath(f"models/{self.db.get_username(self.user.user_id)}_model.pkl")
                 self.db.update_model_path(user_id, model_path)
                 
                 os.makedirs(os.path.dirname(model_path), exist_ok=True)
             
             with open(model_path, 'wb') as f:
-                pickle.dump(self.model.model, f)
+                pickle.dump(self.model, f)
             return True
             
         except Exception as e:
