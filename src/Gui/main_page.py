@@ -1,10 +1,13 @@
 from nicegui import app, ui
 from nicegui.events import KeyEventArguments
 import asyncio
+from asyncio import Lock
 
 from src.Model.Gemini import Gemini
 
 from src.Gui.app import app
+
+COUNTER = 0
 
 @ui.page("/main")
 def main_page():
@@ -120,7 +123,6 @@ def main_page():
             overlay.style.opacity = '1';
             setTimeout(() => overlay.style.opacity = '0', 600);
         ''')
-        await move_panel('right')
 
     async def handle_right():
         ui.run_javascript('''
@@ -129,38 +131,85 @@ def main_page():
             overlay.style.opacity = '1';
             setTimeout(() => overlay.style.opacity = '0', 600);
         ''')
-        await move_panel('left')
 
+    key_handling_lock = Lock()
     async def handle_key(event: KeyEventArguments):
-        if event.key == 'ArrowLeft':
-            await handle_right()
-        elif event.key == 'ArrowRight':
-            await handle_left()
+        global COUNTER
+        async with key_handling_lock:  # Ensure only one key event is processed at a time
+            COUNTER += 1
+
+            if COUNTER == 2:
+                jc.record_like(
+                    event.key == 'ArrowRight',
+                    jc.model.current_job.job_title,
+                    jc.model.current_job.job_employer,
+                    jc.model.current_job.job_location,
+                    jc.model.current_job.job_url
+                )
+                COUNTER = 0
+                if event.key == 'ArrowLeft':
+                    new_job_task = asyncio.create_task(asyncio.to_thread(jc.get_job))
+                    await handle_right()
+                    await move_panel('left', new_job_task)
+                elif event.key == 'ArrowRight':
+                    new_job_task = asyncio.create_task(asyncio.to_thread(jc.get_job))
+                    await handle_left()
+                    await move_panel('right', new_job_task)
 
     ui.keyboard(on_key=handle_key)
 
-    async def move_panel(direction):
-        offset = '+ 500px' if direction == 'right' else '- 500px'
-        rotate = '30deg' if direction == 'right' else '-30deg'
-        ui.run_javascript(f"""
-            const panel = document.getElementById('swipe-card');
-            panel.style.transform = 'translate(calc(-50% {offset}), -50%) rotate({rotate})';
-            panel.style.opacity = '0';
-            setTimeout(() => {{
+    async def move_panel(direction, new_job_task=None):
+        try:
+            # Set animation parameters
+            offset = '+ 500px' if direction == 'right' else '- 500px'
+            rotate = '30deg' if direction == 'right' else '-30deg'
+
+            # Trigger swipe animation
+            await ui.run_javascript(f"""
+                const panel = document.getElementById('swipe-card');
+                // Start animation
+                panel.style.transform = 'translate(calc(-50% {offset}), -50%) rotate({rotate})';
+                panel.style.opacity = '0';
+            """)
+
+            # Record the swipe action while animation is happening
+
+
+            # Get new job data while animation runs (parallel operation)
+
+            # Wait for animation to visually complete
+            await asyncio.sleep(0.5)
+
+            # Reset panel position (instantly)
+            await ui.run_javascript("""
+                const panel = document.getElementById('swipe-card');
                 panel.style.transition = 'none';
                 panel.style.transform = 'translate(-50%, -50%) scale(1)';
-                panel.style.opacity = '1';
-                setTimeout(() => {{
+                panel.style.opacity = '0';  // Start hidden
+                // Restore transition after a frame
+                requestAnimationFrame(() => {
                     panel.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
-                }}, 10);
-            }}, 500);
-        """)
-        
-        await asyncio.sleep(0.3)
-        jc.record_like(direction == 'right', jc.model.current_job.job_title, jc.model.current_job.job_employer, jc.model.current_job.job_location, jc.model.current_job.job_url)
-        new_job = jc.get_job()
-        unwrap_job(new_job)
-        gem.update_job_description(new_job.job_description)
+                    panel.style.opacity = '1';
+                });
+            """)
+
+            # Wait for new job data to be ready
+            new_job = await new_job_task
+            
+            # Update UI with new job data
+            unwrap_job(new_job)
+            gem.update_job_description(new_job.job_description)
+
+        except Exception as e:
+            print(f"Error in move_panel: {e}")
+            # Fallback reset if something went wrong
+            await ui.run_javascript("""
+                const panel = document.getElementById('swipe-card');
+                panel.style.transition = 'transform 0.5s ease, opacity 0.5s ease';
+                panel.style.transform = 'translate(-50%, -50%) scale(1)';
+                panel.style.opacity = '1';
+            """)
+
             
 
     # -------------------- Top Navigation Bar --------------------

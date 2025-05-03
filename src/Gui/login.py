@@ -58,18 +58,19 @@ def signin():
         resp = app.auth.signup(username.value, password.value)
         if resp:
             ui.navigate.to('/main')
+            app.auth.set_preferences(title.value, location.value)
         else:
             ui.notify('Username in use', color='negative')
 
     with ui.stepper().props('vertical').classes('absolute-center shadow-lg rounded-2xl p-6').style('background-color: white; width: 480px; height: 480px;') as stepper:
         with ui.step('Title'):
             ui.label('Please enter preferred title:')
-            ui.input('Title')
+            title = ui.input('Title')
             with ui.stepper_navigation():
                 ui.button('Next', on_click=stepper.next)
         with ui.step('Location'):
             ui.label('Please enter the location where you are looking:')
-            ui.input('Location')
+            location = ui.input('Location')
             with ui.stepper_navigation():
                 ui.button('Next', on_click=stepper.next)
                 ui.button('Back', on_click=stepper.previous).props('flat')

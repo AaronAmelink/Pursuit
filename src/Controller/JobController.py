@@ -10,6 +10,7 @@ import os
 JOB_CACHE_MIN = 20
 JOB_CACHE_PROCESSED_MIN = 5
 LIKES_MIN = 10
+JOB_CACHE_GRAB_AMOUNT = 100
 
 class JobController:
     def __init__(self, db_handler: DatabaseHandler, user_controller: UserController):
@@ -30,9 +31,9 @@ class JobController:
     def record_like(self, swipe_label: bool, job_title, job_employer, job_location,  job_url) -> None:
         """Records a like and updates cache"""
         
-        
-        self._processed_jobs_cache.remove(self.model.current_job)
-        
+        if self.model.current_job in self._processed_jobs_cache:
+            self._processed_jobs_cache.remove(self.model.current_job)
+                
         if swipe_label:
             self.db.add_like(self.user.user_id, job_title, job_employer, job_location, job_url)
 
@@ -56,20 +57,34 @@ class JobController:
             # Random selection for cold start
             selected_job = random.choice(self._processed_jobs_cache)
 
+        self._processed_jobs_cache.remove(selected_job)
         
         self.model.current_job = selected_job
 
         return selected_job
     
     def _refresh_job_cache(self) -> None:
-        if (self.user is None or self.user.user_id is None):
+        if self.user is None or self.user.user_id is None:
             raise ValueError("No authenticated user")
+        
         """Forces a cache update"""
-        prefrences = self.user.get_preferences()
-        self._jobs_cache = get_jobs(job_title=prefrences["preferred_title"], job_location=prefrences["preferred_location"], number_of_results=JOB_CACHE_MIN)
-        for i in range(min(JOB_CACHE_PROCESSED_MIN, len(self._jobs_cache))):
-            self._jobs_cache[i].get_keywords()
-            self._processed_jobs_cache.append(self._jobs_cache[i])
+        if (self._jobs_cache is None or len(self._jobs_cache) < JOB_CACHE_MIN):
+            preferences = self.user.get_preferences()
+            self._jobs_cache = get_jobs(
+                job_title=preferences["preferred_title"],
+                job_location=preferences["preferred_location"],
+                number_of_results=JOB_CACHE_GRAB_AMOUNT
+            )
+        
+        if (self._processed_jobs_cache is None or len(self._processed_jobs_cache) < JOB_CACHE_PROCESSED_MIN):
+                # Process jobs without modifying the list during iteration
+            for job in self._jobs_cache[:JOB_CACHE_PROCESSED_MIN+1]:
+                job.get_keywords()
+                self._processed_jobs_cache.append(job)
+            self._jobs_cache = self._jobs_cache[JOB_CACHE_PROCESSED_MIN:]
+        
+
+        
 
     def _rank_jobs(self, jobs: list[Job]) -> list[Job]:
         """Returns a ranked list of jobs based on user preferences"""

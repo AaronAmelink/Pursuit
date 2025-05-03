@@ -8,6 +8,7 @@ import random
 
 class LikeModel:
     def __init__(self, vectorizer=None, model=None, model_type="RandomForest", min_samples=20):
+        #Random forest is best but SGD is faster
         self.min_samples = min_samples
         self.vectorizer = vectorizer
         self.model = model

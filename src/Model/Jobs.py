@@ -98,7 +98,7 @@ class Job:
         self.job_url = job_url
         self.keywords = []
 
-
+    #YAKE is fastest but hugging face is more accurate
     def get_keywords(self, model="YAKE") -> list:
         """
         Get keywords from the job description using different models.
@@ -125,10 +125,12 @@ def get_jobs(job_title: str, job_location: str, number_of_results=20, hours_old=
     :param hours_old: Number of hours old the job postings should be.
     :return: List of job instances.
     """
+
     jobs = scrape_jobs(
         site_name=["indeed"],
-        search_term=job_title,
+        search_term=f"'{job_title}'",
         location=job_location,
+        country_indeed="Canada",
         results_wanted=number_of_results,
         hours_old=hours_old,
     )
