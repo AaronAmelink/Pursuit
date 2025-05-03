@@ -1,7 +1,7 @@
-from Model.Model import LikeModel
-from Model.Jobs import Job, get_jobs
-from database import DatabaseHandler
-from Controller import UserController
+from ..Model.Model import LikeModel
+from ..Model.Jobs import Job, get_jobs
+from ..database import DatabaseHandler
+from ..Controller import UserController
 import random
 
 JOB_CACHE_MIN = 20

@@ -1,4 +1,4 @@
-from database import DatabaseHandler
+from ..database import DatabaseHandler
 from typing import Dict
 
 class UserController:
