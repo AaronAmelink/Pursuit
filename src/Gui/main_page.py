@@ -210,6 +210,17 @@ def main_page():
                 panel.style.opacity = '1';
             """)
 
+    def open_chat():
+        if (liked_drawer.value):
+            liked_drawer.toggle()
+        else:
+            chat_drawer.toggle()
+    def open_liked_jobs():
+        if (chat_drawer.value):
+            chat_drawer.toggle()
+        else:
+            load_liked_jobs()
+            liked_drawer.toggle()
             
 
     # -------------------- Top Navigation Bar --------------------
@@ -228,8 +239,10 @@ def main_page():
                 ui.menu_item('Close', menu.close)
         ui.image('./src/Gui/icons/logo.png').props('id=logo').style('width: 90px; height: 30px;')
         ui.space()
-        ui.button('Open Chat', on_click=lambda: chat_drawer.toggle())
-        ui.button('Liked Jobs', on_click=lambda: (load_liked_jobs(), liked_drawer.toggle()))
+        ui.button('Open Chat', on_click=open_chat)
+        ui.button('Liked Jobs', on_click=open_liked_jobs)
+
+    
 
 
     # -------------------- Main Swipe Card --------------------
