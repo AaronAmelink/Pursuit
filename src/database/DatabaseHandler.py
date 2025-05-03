@@ -50,7 +50,7 @@ class DatabaseHandler:
                         job_employer VARCHAR(255) NOT NULL,
                         job_location VARCHAR(255) NOT NULL,
                         job_url VARCHAR(255),
-                        posted_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                        posted_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
                 
@@ -64,7 +64,7 @@ class DatabaseHandler:
                         swipe_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
                         FOREIGN KEY (job_id) REFERENCES JOBS(job_id) ON DELETE CASCADE,
-                        UNIQUE KEY (user_id, job_id),  -- Prevent duplicate likes
+                        UNIQUE KEY (user_id, job_id)  -- Prevent duplicate likes
                     )
                 """)
                 conn.commit()
@@ -139,7 +139,7 @@ class DatabaseHandler:
         with self._get_connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
                 cursor.execute("""
-                    SELECT j.job_id, j.title, j.employer, j.location, j.posted_at
+                    SELECT j.job_id, j.job_title, j.job_employer, j.job_location, j.posted_at
                     FROM jobs j
                     JOIN likes l ON j.job_id = l.job_id
                     WHERE l.user_id = %s AND l.swipe_label = 1

@@ -5,6 +5,8 @@ import asyncio
 from src.Model.Gemini import Gemini
 from src.Controller.JobController import JobController
 
+from src.Gui.app import app
+
 @ui.page("/main")
 def main_page():
     ui.page_title('Pursuit - Swipe into something better!')
@@ -12,7 +14,8 @@ def main_page():
         
 
     gem = Gemini()
-    jc = JobController()
+    jc = app.jobs
+    jc._load_model()
 
     
     ui.add_head_html('''
@@ -98,9 +101,9 @@ def main_page():
         # Description
         with ui.row():
             ui.icon('description', color='primary').classes('text-4xl')
-            description = ui.label('Description\n').classes('text-3xl')
+            ui.label('Description\n').classes('text-3xl')
             with ui.scroll_area().style('width: 460px; height: 200px;'):
-                ui.label('...\n' * 400)
+                description = ui.label('...\n' * 400)
         ui.space() 
         # Company
         with ui.row():

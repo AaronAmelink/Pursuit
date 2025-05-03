@@ -18,6 +18,10 @@ class Gemini:
         self.client = genai.Client(api_key=API_KEY)
         self.model = "gemini-2.0-flash"
         self.job_description = ""
+
+    def update_job_description(self, job_description: str) -> None:
+        """Update the job description for the model"""
+        self.job_description = job_description
     
     def generate_content(self, prompt: str) -> str:
         system_prompt = (

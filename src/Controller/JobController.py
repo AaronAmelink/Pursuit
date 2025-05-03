@@ -16,7 +16,7 @@ class JobController:
         self.user = user_controller
         self.model = None
         self._liked_jobs_cache: list[dict] | None = None
-        self._jobs_cache: list[Job]
+        self._jobs_cache: list[Job] = []
         self._processed_jobs_cache: list[Job] = []
         self._load_model()
 
@@ -56,6 +56,7 @@ class JobController:
         else:
             # Random selection for cold start
             selected_job = random.choice(self._processed_jobs_cache)
+
         
         self.model.current_job = selected_job
 
@@ -64,12 +65,11 @@ class JobController:
     
     def _refresh_job_cache(self) -> None:
         """Forces a cache update"""
-        prefrences = self.user.get_preferences(self.user.user_id)
+        prefrences = self.user.get_preferences()
         self._jobs_cache = get_jobs(job_title=prefrences["preferred_title"], job_location=prefrences["preferred_location"], number_of_results=JOB_CACHE_MIN)
-        for i in JOB_CACHE_PROCESSED_MIN:
+        for i in range(min(JOB_CACHE_PROCESSED_MIN, len(self._jobs_cache))):
             self._jobs_cache[i].get_keywords()
             self._processed_jobs_cache.append(self._jobs_cache[i])
-            self._jobs_cache.pop(i)
 
     def _rank_jobs(self, jobs: list[Job]) -> list[Job]:
         """Returns a ranked list of jobs based on user preferences"""
@@ -85,7 +85,7 @@ class JobController:
         """Loads the model from the user-specific path in database.
         Returns True if successful, False otherwise."""
         try:
-            user_id = self.user.current_user_id
+            user_id = self.user.user_id
             if user_id is None:
                 raise ValueError("No authenticated user")
             
@@ -109,7 +109,7 @@ class JobController:
         """Saves the current model to the user-specific path in database.
         Returns True if successful, False otherwise."""
         try:
-            user_id = self.user.current_user_id
+            user_id = self.user.user_id
             if user_id is None:
                 raise ValueError("No authenticated user")
             
