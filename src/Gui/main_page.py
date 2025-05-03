@@ -6,6 +6,7 @@ from src.Model.Gemini import Gemini
 
 @ui.page("/main")
 def main_page():
+    ui.page_title('Pursuit - Swipe into something better!')
 
     gem = Gemini()
     

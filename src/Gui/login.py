@@ -1,4 +1,4 @@
-from nicegui import app, ui
+from nicegui import ui
 from nicegui.events import KeyEventArguments
 
 import sys
@@ -10,10 +10,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 
 import main_page
 
-from src.Gui.app import app
+from src.Gui import app
 # Add the root directory to the Python module search path
 
-from nicegui import app, ui
 from src.Controller.UserController import UserController
 
 
@@ -43,8 +42,8 @@ def login():
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
 
     def check_login():
-        check = app.login(username.value, password.value)
-        if check is True:
+        check = app.auth.login(username.value, password.value)
+        if check:
             ui.navigate.to('/main')
         else:
             with ui.dialogue() as dialogue, ui.card():
@@ -64,8 +63,15 @@ def signin():
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
 
     def check_signin():
-        #tbd
-        ui.navigate.to('/main')
+        resp = app.auth.signup(username.value, password.value)
+        if resp:
+            ui.navigate.to('/main')
+        else:
+            with ui.dialogue() as dialogue, ui.card():
+                ui.label("Username already exists or invalid input")
+                ui.button('Close', on_click=dialogue.close)
+                username.value = ''
+                password.value = ''
     
     with ui.stepper().props('vertical').classes('w-full').style('width: 480px; height: 480px;').classes('absolute-center') as stepper:
         with ui.step('Title'):
@@ -82,10 +88,11 @@ def signin():
 
         with ui.step('Credentials'):
             ui.label('Please enter your future credentials')
-            ui.input('Username')
-            ui.input('Password', password=True, password_toggle_button=True)
+            username = ui.input('Username')
+            password = ui.input('Password', password=True, password_toggle_button=True)
             with ui.stepper_navigation():
                 ui.button('Sign in', on_click=check_signin)
                 ui.button('Back', on_click=stepper.previous).props('flat')
+
 
 ui.run()
