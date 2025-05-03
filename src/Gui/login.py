@@ -12,8 +12,6 @@ def first():
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
     
 
-    
-
     def to_login():
         ui.navigate.to('/login')
     def to_singin():
@@ -21,9 +19,10 @@ def first():
 
     with ui.column().classes('absolute-center'):
         ui.image('./src/Gui/icons/logo.png').style('width: 120vph; height: 40vph;')  # Increased size
+        ui.label('"Swipe Into Something Better."').style('font-size: 20px; font-weight: bold; font-style: italic;')  # Increased font size
         with ui.row().style('gap: 20px;'):  # Added spacing between buttons
             ui.button('Log in', on_click=to_login).style('font-size: 20px; padding: 15px 30px;')  # Increased button size
-            ui.button('Sign in', on_click=to_singin).style('font-size: 20px; padding: 15px 30px;')  # Increased button size
+            ui.button('Sign Up', on_click=to_singin).style('font-size: 20px; padding: 15px 30px;')  # Increased button size
     
 
 @ui.page('/login')

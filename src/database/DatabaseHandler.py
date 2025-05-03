@@ -1,7 +1,7 @@
 import mysql.connector
 from mysql.connector import Error
 from datetime import datetime
-from typing import Any, Dict
+from typing import Dict
 
 class DatabaseHandler:
     def __init__(self, host: str, database: str, user: str, password: str):
@@ -58,7 +58,7 @@ class DatabaseHandler:
                         like_id INT AUTO_INCREMENT PRIMARY KEY,
                         user_id INT NOT NULL,
                         job_id INT NOT NULL,
-                        swipe_label TINYINT NOT NULL DEFAULT 1, -- -1 = not shown, 0 = passed, 1 = liked
+                        swipe_label INT NOT NULL DEFAULT -1, -- -1 = not shown, 0 = passed, 1 = liked
                         swipe_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
                         FOREIGN KEY (job_id) REFERENCES JOBS(job_id) ON DELETE CASCADE,
@@ -137,19 +137,29 @@ class DatabaseHandler:
                     SELECT j.job_id, j.title, j.employer, j.location, j.posted_at
                     FROM jobs j
                     JOIN likes l ON j.job_id = l.job_id
-                    WHERE l.user_id = %s
+                    WHERE l.user_id = %s AND l.swipe_label = 1
                     ORDER BY l.swipe_time DESC
                 """, (user_id,))
                 return cursor.fetchall()
 
-    def add_like(self, user_id: int, job_id: int) -> None:
+    def add_like(self, user_id: int, job_id: int, swipe_label: int) -> None:
         """Records a like in the database"""
         with self._get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    INSERT INTO likes (user_id, job_id)
-                    VALUES (%s, %s)
+                    INSERT INTO likes (user_id, job_id, swipe_label)
+                    VALUES (%s, %s, %s)
                     ON DUPLICATE KEY UPDATE swipe_time = CURRENT_TIMESTAMP
                 """, (user_id, job_id))
                 conn.commit()
 
+    def add_job(self, job_title: str, job_employer: str, job_location: str, job_url: str) -> int:
+        """Adds a new job to the database and returns its ID"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO jobs (job_title, job_employer, job_location, job_url)
+                    VALUES (%s, %s, %s, %s)
+                """, (job_title, job_employer, job_location, job_url))
+                conn.commit()
+                return cursor.lastrowid
