@@ -54,7 +54,6 @@ class JobController:
             ranked_jobs = self._rank_jobs(self._processed_jobs_cache)
             selected_job = ranked_jobs[0]
         else:
-            # Random selection for cold start
             selected_job = random.choice(self._processed_jobs_cache)
 
         self._processed_jobs_cache.remove(selected_job)

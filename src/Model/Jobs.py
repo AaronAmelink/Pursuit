@@ -116,7 +116,7 @@ class Job:
 
         return list(set(self.keywords))
 
-def get_jobs(job_title: str, job_location: str, number_of_results=20, hours_old=72) -> list:
+def get_jobs(job_title: str, job_location: str, number_of_results=20, hours_old=7*3*24) -> list:
     """
     Get a list of job instances based on the job title and location.
     :param job_title: Title of the job to search for.
@@ -128,7 +128,7 @@ def get_jobs(job_title: str, job_location: str, number_of_results=20, hours_old=
 
     jobs = scrape_jobs(
         site_name=["indeed"],
-        search_term=f"'{job_title}'",
+        search_term=job_title,
         location=job_location,
         country_indeed="Canada",
         results_wanted=number_of_results,
