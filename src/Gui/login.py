@@ -10,6 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 
 import main_page
 
+from src.Gui.app import app
 # Add the root directory to the Python module search path
 
 from nicegui import app, ui
@@ -42,12 +43,19 @@ def login():
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
 
     def check_login():
-        #tbd
-        ui.navigate.to('/main')
+        check = app.login(username.value, password.value)
+        if check is True:
+            ui.navigate.to('/main')
+        else:
+            with ui.dialogue() as dialogue, ui.card():
+                ui.label("Incorrect username or password")
+                ui.button('Close', on_click=dialogue.close)
+                username.value = ''
+                password.value = ''
     
     with ui.card().classes('absolute-center'):
-        ui.input('Username')
-        ui.input('Password', password=True, password_toggle_button=True)
+        username = ui.input('Username')
+        password = ui.input('Password', password=True, password_toggle_button=True)
         ui.button('Log in', on_click=check_login)
 
 @ui.page('/signin')
