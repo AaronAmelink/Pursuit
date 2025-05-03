@@ -41,30 +41,20 @@ class DatabaseHandler:
                         creation_time DATETIME NOT NULL
                     )
                 """)
-                
-                # Jobs table (new)
-                cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS JOBS (
-                        job_id INT AUTO_INCREMENT PRIMARY KEY,
-                        job_title VARCHAR(255) NOT NULL,
-                        job_employer VARCHAR(255) NOT NULL,
-                        job_location VARCHAR(255) NOT NULL,
-                        job_url VARCHAR(255),
-                        posted_at DATETIME DEFAULT CURRENT_TIMESTAMP
-                    )
-                """)
+            
                 
                 # Likes table (normalized)
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS LIKES (
                         like_id INT AUTO_INCREMENT PRIMARY KEY,
                         user_id INT NOT NULL,
-                        job_id INT NOT NULL,
-                        swipe_label INT NOT NULL DEFAULT -1, -- -1 = not shown, 0 = passed, 1 = liked
                         swipe_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                         FOREIGN KEY (user_id) REFERENCES USERS(user_id) ON DELETE CASCADE,
-                        FOREIGN KEY (job_id) REFERENCES JOBS(job_id) ON DELETE CASCADE,
-                        UNIQUE KEY (user_id, job_id)  -- Prevent duplicate likes
+                        job_title VARCHAR(255) NOT NULL,
+                        job_employer VARCHAR(255) NOT NULL,
+                        job_location VARCHAR(255) NOT NULL,
+                        job_url VARCHAR(255),
+                        posted_at DATETIME DEFAULT CURRENT_TIMESTAMP
                     )
                 """)
                 conn.commit()
@@ -80,11 +70,8 @@ class DatabaseHandler:
     def create_user(self, username: str, password: str) -> int | None:
         """Create new user and return user_id with default model path"""
         try:
-            with open('model.pkl', 'w') as file:
-                model_path = os.path.abspath(f"models/{username}_model.pkl")
+            model_path = os.path.abspath(f"models/{username}_model.pkl")
 
-            if not os.path.exists(model_path):
-                raise FileNotFoundError(f"Model file not found at {model_path}")
             
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
@@ -153,46 +140,23 @@ class DatabaseHandler:
         with self._get_connection() as conn:
             with conn.cursor(dictionary=True) as cursor:
                 cursor.execute("""
-                    SELECT j.job_id, j.job_title, j.job_employer, j.job_location, j.posted_at
-                    FROM jobs j
-                    JOIN likes l ON j.job_id = l.job_id
-                    WHERE l.user_id = %s AND l.swipe_label = 1
-                    ORDER BY l.swipe_time DESC
+                    SELECT * FROM LIKES
+                    WHERE user_id = %s
                 """, (user_id,))
                 return cursor.fetchall()
 
-    def add_like(self, user_id: int, job_id: int, swipe_label: int) -> None:
+    def add_like(self, user_id: int, job_title, job_employer, job_location, job_url) -> None:
         """Records a like in the database"""
         with self._get_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    INSERT INTO likes (user_id, job_id, swipe_label)
-                    VALUES (%s, %s, %s)
+                    INSERT INTO LIKES (user_id, job_title, job_employer, job_location, job_url)
+                    VALUES (%s, %s, %s, %s, %s)
                     ON DUPLICATE KEY UPDATE swipe_time = CURRENT_TIMESTAMP
-                """, (user_id, job_id))
+                """, (user_id, job_title, job_employer, job_location, job_url))
                 conn.commit()
 
-    def add_job(self, job_title: str, job_employer: str, job_location: str, job_url: str) -> int:
-        """Adds a new job to the database and returns its ID"""
-        with self._get_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO jobs (job_title, job_employer, job_location, job_url)
-                    VALUES (%s, %s, %s, %s)
-                """, (job_title, job_employer, job_location, job_url))
-                conn.commit()
-                return cursor.lastrowid
 
-    def get_job_id(self, job_title: str, job_employer: str, job_location: str) -> int | None:
-        """Retrieve job ID based on title, employer, and location"""
-        with self._get_connection() as conn:
-            with conn.cursor() as cursor:
-                cursor.execute("""
-                    SELECT job_id FROM jobs 
-                    WHERE job_title = %s AND job_employer = %s AND job_location = %s
-                """, (job_title, job_employer, job_location))
-                result = cursor.fetchone()
-                return result[0] if result else None
 
 
 

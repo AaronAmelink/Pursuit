@@ -1,3 +1,4 @@
+from torch import mode
 from src.Model.Model import LikeModel
 from src.Model.Jobs import Job, get_jobs
 from src.database.DatabaseHandler import DatabaseHandler
@@ -18,7 +19,7 @@ class JobController:
         self._liked_jobs_cache: list[dict] | None = None
         self._jobs_cache: list[Job] = []
         self._processed_jobs_cache: list[Job] = []
-        self._load_model()
+        
 
     def get_liked(self) -> list[dict]:
         """Returns cached liked jobs or queries DB if needed"""
@@ -26,16 +27,14 @@ class JobController:
             self._refresh_liked_cache()
         return self._liked_jobs_cache
 
-    def record_like(self, swipe_label: bool) -> None:
+    def record_like(self, swipe_label: bool, job_title, job_employer, job_location,  job_url) -> None:
         """Records a like and updates cache"""
-        job_id = self.db.get_job_id(self.model.current_job.job_title, self.model.current_job.job_employer, self.model.current_job.job_location)
         
-        if job_id is None:
-            raise ValueError("Job ID not found in database")
         
         self._processed_jobs_cache.remove(self.model.current_job)
         
-        self.db.add_like(self.user.user_id, job_id, swipe_label)
+        if swipe_label:
+            self.db.add_like(self.user.user_id, job_title, job_employer, job_location, job_url)
 
         self.model.give_feedback(swipe_label)
 
@@ -60,10 +59,11 @@ class JobController:
         
         self.model.current_job = selected_job
 
-        self.db.add_job(selected_job.job_title, selected_job.job_employer, selected_job.job_location, selected_job.job_url)
         return selected_job
     
     def _refresh_job_cache(self) -> None:
+        if (self.user is None or self.user.user_id is None):
+            raise ValueError("No authenticated user")
         """Forces a cache update"""
         prefrences = self.user.get_preferences()
         self._jobs_cache = get_jobs(job_title=prefrences["preferred_title"], job_location=prefrences["preferred_location"], number_of_results=JOB_CACHE_MIN)
@@ -94,7 +94,7 @@ class JobController:
                 raise FileNotFoundError("No model path found for user")
             
             if not os.path.exists(model_path):
-                self.model = LikeModel()
+                self.model = LikeModel(model_type="SGDClassifier")
                 return True
             
             with open(model_path, 'rb') as f:

@@ -3,7 +3,6 @@ from nicegui.events import KeyEventArguments
 import asyncio
 
 from src.Model.Gemini import Gemini
-from src.Controller.JobController import JobController
 
 from src.Gui.app import app
 
@@ -86,7 +85,7 @@ def main_page():
             """)
         
         #get new job
-        jc.record_like(direction == 'right')
+        jc.record_like(direction == 'right', jc.model.current_job.job_title, jc.model.current_job.job_employer, jc.model.current_job.job_location, jc.model.current_job.job_url)
         new_job = jc.get_job()
         unwrap_job(new_job)
         gem.update_job_description(new_job.job_description)

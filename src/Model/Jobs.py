@@ -99,7 +99,7 @@ class Job:
         self.keywords = []
 
 
-    def get_keywords(self, model="HUGGINGFACE") -> list:
+    def get_keywords(self, model="YAKE") -> list:
         """
         Get keywords from the job description using different models.
         :param model: Model to use for keyword extraction. Options are "YAKE", "HUGGINGFACE", "SPACY".
