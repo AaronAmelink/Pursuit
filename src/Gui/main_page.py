@@ -50,7 +50,7 @@ def main_page():
                 ui.space()
             ui.button(icon = 'thumb_up', on_click=on_up).props('icon-color: #4CAF50;') 
 
-    with ui.row().classes('w-full items-center justify-between'): 
+    with ui.row().classes('w-full border items-center justify-between').style('background: none; box-shadow: none; border: none;'): 
         with ui.button(icon='menu'):
             with ui.menu() as menu:
                 ui.menu_item('Sign out', on_click=lambda: ui.navigate.to('/'))
@@ -58,6 +58,9 @@ def main_page():
                 ui.menu_item('Exit', on_click=lambda: (ui.run_javascript("window.location.href = 'about:blank';"), app.shutdown()))
                 ui.separator()
                 ui.menu_item('Close', menu.close)
+        ui.image('./src/Gui/icons/logo.png').style('width: 90px; height: 30px;')
+
+        ui.space()
 
         with ui.button('Liked Jobs'):
             with ui.menu() as menu:
