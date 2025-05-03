@@ -109,7 +109,7 @@ class Job:
         elif (model == "SPACY"):
             self.keywords = [clean_keyword(i["word"]) for i in extract_with_spacy(self.job_description)["entities"]]
 
-        return self.keywords
+        return list(set(self.keywords))
 
 def get_jobs(job_title, job_location, number_of_results=20, hours_old=72):
     jobs = scrape_jobs(
