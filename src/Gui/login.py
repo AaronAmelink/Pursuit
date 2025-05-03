@@ -10,7 +10,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'
 
 import main_page
 
-from src.Gui import app
+from src.Gui.app import app
 # Add the root directory to the Python module search path
 
 from src.Controller.UserController import UserController
@@ -46,11 +46,8 @@ def login():
         if check:
             ui.navigate.to('/main')
         else:
-            with ui.dialogue() as dialogue, ui.card():
-                ui.label("Incorrect username or password")
-                ui.button('Close', on_click=dialogue.close)
-                username.value = ''
-                password.value = ''
+            ui.notify('Incorrect username or password', color='negative')
+            
     
     with ui.card().classes('absolute-center'):
         username = ui.input('Username')
@@ -67,11 +64,7 @@ def signin():
         if resp:
             ui.navigate.to('/main')
         else:
-            with ui.dialogue() as dialogue, ui.card():
-                ui.label("Username already exists or invalid input")
-                ui.button('Close', on_click=dialogue.close)
-                username.value = ''
-                password.value = ''
+            ui.notify('Username in use', color='negative')
     
     with ui.stepper().props('vertical').classes('w-full').style('width: 480px; height: 480px;').classes('absolute-center') as stepper:
         with ui.step('Title'):

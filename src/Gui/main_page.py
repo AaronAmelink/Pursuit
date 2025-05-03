@@ -191,9 +191,9 @@ def main_page():
         ui.space()
         with ui.row():
             ui.icon('description', color='primary').classes('text-4xl')
-            description = ui.label('Description\n').classes('text-3xl')
+            ui.label('Description\n').classes('text-3xl')
             with ui.scroll_area().style('width: 460px; height: 200px;'):
-                ui.label('...\n' * 400)
+                description = ui.label('...\n' * 400)
         ui.space()
         with ui.row():
             ui.icon('factory', color='primary').classes('text-4xl')
@@ -246,13 +246,13 @@ def main_page():
     # -------------------- Function to Load Liked Jobs --------------------
     def load_liked_jobs():
         liked_jobs_column.clear()
-        for job in get_liked():
+        for job in jc.get_liked():
             with liked_jobs_column:
                 with ui.card().style('padding: 10px; height: 20vh; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;'):
-                    ui.label(f"🔹 {job['title']}").classes('text-xl font-bold')
-                    ui.label(f"🏢 {job['employer']}").classes('text-md')
-                    ui.label(f"📍 {job['location']}").classes('text-md')
-                    ui.link('🔗 View Posting', job['url']).classes('text-blue-500 underline')
+                    ui.label(f"🔹 {job['job_title']}").classes('text-xl font-bold')
+                    ui.label(f"🏢 {job['job_employer']}").classes('text-md')
+                    ui.label(f"📍 {job['job_location']}").classes('text-md')
+                    ui.link('🔗 View Posting', job['job_url']).classes('text-blue-500 underline')
 
 
      # -------------------- Gemini Chat Drawer --------------------
