@@ -4,6 +4,7 @@ import asyncio
 
 @ui.page("/main")
 def main_page():
+    ui.page_title('Pursuit - Swipe into something better!')
     ui.add_head_html('''
         <style>
             body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}

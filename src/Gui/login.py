@@ -1,10 +1,14 @@
 from nicegui import app, ui
 from nicegui.events import KeyEventArguments
-
+import sys
+import os
+#sys.path.append(os.path.abspath("../Controller"))
+#import UserController
 import main_page
 
 @ui.page('/')
 def first():
+    ui.page_title('Pursuit - Swipe into something better!')
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
     
 
@@ -24,6 +28,7 @@ def first():
 
 @ui.page('/login')
 def login():
+    ui.page_title('Pursuit - Swipe into something better!')
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
 
     def check_login():
@@ -37,6 +42,7 @@ def login():
 
 @ui.page('/signin')
 def signin():
+    ui.page_title('Pursuit - Swipe into something better!')
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
 
     def check_signin():
