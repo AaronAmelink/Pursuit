@@ -1,10 +1,13 @@
 from nicegui import app, ui
 from nicegui.events import KeyEventArguments
 import asyncio
+from src.Model.Gemini import Gemini
 
 @ui.page("/main")
 def main_page():
     ui.page_title('Pursuit - Swipe into something better!')
+    #gem = Gemini()
+
     ui.add_head_html('''
         <style>
             body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}
@@ -105,6 +108,29 @@ def main_page():
         with ui.row().style('justify-content: space-between; width: 100%; padding: 0 20px;'):
             ui.button(icon='thumb_down', on_click=handle_right).props('icon-color: #F44336;')  # Left-aligned button
             ui.button(icon='thumb_up', on_click=handle_left).props('icon-color: #4CAF50;')  # Right-aligned button
+
+    ui.add_css(r'a:link, a:visited {color: inherit !important; text-decoration: none; font-weight: 500}')
+
+    # the queries below are used to expand the contend down to the footer (content can then use flex-grow to expand)
+    ui.query('.q-page').classes('flex')
+    ui.query('.nicegui-content').classes('w-full')
+
+    with ui.tabs().classes('w-full') as tabs:
+        chat_tab = ui.tab('Chat')
+        logs_tab = ui.tab('Logs')
+    with ui.tab_panels(tabs, value=chat_tab).classes('w-full max-w-2xl mx-auto flex-grow items-stretch'):
+        message_container = ui.tab_panel(chat_tab).classes('items-stretch')
+        with ui.tab_panel(logs_tab):
+            log = ui.log().classes('w-full h-full')
+
+    with ui.footer().classes('bg-white'), ui.column().classes('w-full max-w-3xl mx-auto my-6'):
+        with ui.row().classes('w-full no-wrap items-center'):
+            placeholder = 'message' if gem.key_set != 'not-set' else \
+                'Please provide your OPENAI key in the Python script first!'
+            text = ui.input(placeholder=placeholder).props('rounded outlined input-class=mx-3') \
+                .classes('w-full self-center').on('keydown.enter')
+        ui.markdown('simple chat app built with [NiceGUI](https://nicegui.io)') \
+            .classes('text-xs self-end mr-8 m-[-1em] text-primary')
 
     def toggle_sidebar():
             drawer.toggle()
