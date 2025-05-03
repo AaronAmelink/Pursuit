@@ -80,7 +80,11 @@ class DatabaseHandler:
     def create_user(self, username: str, password: str) -> int | None:
         """Create new user and return user_id with default model path"""
         try:
-            model_path = os.path.abspath("models/default_model.pkl")
+            with open('model.pkl', 'w') as file:
+                model_path = os.path.abspath(f"models/{username}_model.pkl")
+
+            if not os.path.exists(model_path):
+                raise FileNotFoundError(f"Model file not found at {model_path}")
             
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
@@ -119,6 +123,16 @@ class DatabaseHandler:
                     'preferred_title': result[0] if result else None,
                     'preferred_location': result[1] if result else None
                 }
+
+    def get_username(self, user_id: int) -> str | None:
+        """Get username by user_id"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT username FROM USERS WHERE user_id = %s
+                """, (user_id,))
+                result = cursor.fetchone()
+                return result[0] if result else None
 
     def update_preferences(self, user_id: int, title: str, location: str) -> bool:
         """Update user's job preferences"""

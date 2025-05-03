@@ -78,7 +78,7 @@ class JobController:
             key=lambda job: self.model.predict(job.keywords),
             reverse=True
         )
-    
+
 
 
     def _load_model(self) -> bool:
@@ -115,13 +115,13 @@ class JobController:
             
             model_path = self.db.get_model_path(user_id)
             if not model_path:
-                model_path = os.path.abspath(f"models/user_{user_id}_model.pkl")
+                model_path = os.path.abspath(f"models/{self.db.get_username(self.user.user_id)}_model.pkl")
                 self.db.update_model_path(user_id, model_path)
                 
                 os.makedirs(os.path.dirname(model_path), exist_ok=True)
             
             with open(model_path, 'wb') as f:
-                pickle.dump(self.model.model, f)
+                pickle.dump(self.model, f)
             return True
             
         except Exception as e:
