@@ -2,7 +2,6 @@ from nicegui import app, ui
 from nicegui.events import KeyEventArguments
 import asyncio
 
-
 @ui.page("/main")
 def main_page():
     ui.add_head_html('''
@@ -109,12 +108,13 @@ def main_page():
                 ui.menu_item('Close', menu.close)
         ui.image('./src/Gui/icons/logo.png').style('width: 90px; height: 30px;')
 
-        ui.space()
 
-        with ui.button('Liked Jobs'):
-            with ui.menu() as menu:
-                ui.menu_item('Menu item 1')
-                ui.menu_item('Menu item 2')
-                ui.menu_item('Menu item 3')
-                ui.separator()
-                ui.menu_item('Close', menu.close)
+    with ui.drawer(side='right') as drawer:
+        ui.menu_item('Menu item 1')
+        ui.menu_item('Menu item 2')
+        ui.menu_item('Menu item 3')
+        ui.separator()
+        ui.menu_item('Close', menu.close)
+    def toggle_sidebar():
+        drawer.toggle()
+    ui.button('Liked Jobs', on_click=toggle_sidebar).classes('absolute top-0 right-0 p-4')
