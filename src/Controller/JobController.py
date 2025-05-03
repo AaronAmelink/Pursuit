@@ -1,4 +1,3 @@
-from torch import mode
 from src.Model.Model import LikeModel
 from src.Model.Jobs import Job, get_jobs
 from src.database.DatabaseHandler import DatabaseHandler
@@ -45,6 +44,7 @@ class JobController:
         """Forces a cache update"""
         self._liked_jobs_cache = self.db.get_liked_jobs(self.user.user_id)
 
+
     def get_job(self) -> Job:
         """Returns predicted job"""
         if len(self._jobs_cache) < JOB_CACHE_MIN or len(self._processed_jobs_cache) < JOB_CACHE_PROCESSED_MIN:
@@ -82,9 +82,6 @@ class JobController:
                 job.get_keywords()
                 self._processed_jobs_cache.append(job)
             self._jobs_cache = self._jobs_cache[JOB_CACHE_PROCESSED_MIN:]
-        
-
-        
 
     def _rank_jobs(self, jobs: list[Job]) -> list[Job]:
         """Returns a ranked list of jobs based on user preferences"""
@@ -93,7 +90,6 @@ class JobController:
             key=lambda job: self.model.predict(job.keywords),
             reverse=True
         )
-
 
 
     def _load_model(self) -> bool:

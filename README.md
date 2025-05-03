@@ -19,10 +19,10 @@ Pursuit is an innovative job search application that brings the simplicity and i
 
 | Component          | Technology         |
 |--------------------|--------------------|
-| Backend           | Python             |
-| Frontend          | NiceGUI            |
-| NLP Processing    | Hugging Face       |
-| Machine Learning  | Scikit-learn       |
-| Job Data          | JobSpy API         |
-| Database          | SQL (SQLite/PostgreSQL) |
+| Backend            | Python             |
+| Frontend           | NiceGUI            |
+| NLP Processing     | Hugging Face       |
+| Machine Learning   | Scikit-learn       |
+| Job Data           | JobSpy API         |
+| Database           | SQL (MySQL)        |
 
