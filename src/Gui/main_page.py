@@ -342,13 +342,6 @@ def main_page():
         chat_messages.append(f"Gemini: {resp}")
         chat_label.text = "\n".join(chat_messages)  # Update the chat label
 
-    # Define a toggle function for the chat drawer
-    def toggle_chat_drawer():
-        if (drawer.value):
-            drawer.toggle()
-        else:
-            chat_drawer.toggle()
-
     # Replace the chat card with a drawer
     # Replace the chat card with a larger drawer
     with ui.drawer(side='right', value=False).props('id=chat-drawer').style('width: 500px; height: 100%;') as chat_drawer:
