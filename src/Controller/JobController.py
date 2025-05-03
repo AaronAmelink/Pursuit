@@ -10,12 +10,13 @@ JOB_CACHE_MIN = 20
 LIKES_MIN = 10
 
 class JobController:
-    def __init__(self, db_handler: DatabaseHandler, user_controller: UserController, model: LikeModel):
+    def __init__(self, db_handler: DatabaseHandler, user_controller: UserController):
         self.db = db_handler
-        self.user = user_controller  # Reference to auth controller
-        self.model = model
+        self.user = user_controller
+        self.model = None
         self._liked_jobs_cache: list[dict] | None = None
         self._jobs_cache: list[Job]
+        self._load_model()
 
     def get_liked(self) -> list[dict]:
         """Returns cached liked jobs or queries DB if needed"""
@@ -23,18 +24,22 @@ class JobController:
             self._refresh_liked_cache()
         return self._liked_jobs_cache
 
-    def record_like(self, job_id: int, swipe_label: bool) -> None:
+    def record_like(self, swipe_label: bool) -> None:
         """Records a like and updates cache"""
-        self.db.add_like(self.auth.current_user_id, job_id, swipe_label)
+        job_id = self.db.get_job_id(self.model.current_job.job_title, self.model.current_job.job_employer, self.model.current_job.job_location)
+        
+        if job_id is None:
+            raise ValueError("Job ID not found in database")
+        
+        self.db.add_like(self.user.user_id, job_id, swipe_label)
 
-        job = self.model.current_job
         self.model.give_feedback(swipe_label)
 
         self._refresh_liked_cache()
 
     def _refresh_liked_cache(self) -> None:
         """Forces a cache update"""
-        self._liked_jobs_cache = self.db.get_liked_jobs(self.auth.current_user_id)
+        self._liked_jobs_cache = self.db.get_liked_jobs(self.user.user_id)
 
     def get_job(self) -> Job:
         """Returns predicted job"""
@@ -68,7 +73,7 @@ class JobController:
     
 
 
-    def load_model(self) -> bool:
+    def _load_model(self) -> bool:
         """Loads the model from the user-specific path in database.
         Returns True if successful, False otherwise."""
         try:
@@ -92,7 +97,7 @@ class JobController:
             print(f"Error loading model: {e}")
             return False
 
-    def save_model(self) -> bool:
+    def _save_model(self) -> bool:
         """Saves the current model to the user-specific path in database.
         Returns True if successful, False otherwise."""
         try:

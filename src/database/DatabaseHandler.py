@@ -169,6 +169,17 @@ class DatabaseHandler:
                 conn.commit()
                 return cursor.lastrowid
 
+    def get_job_id(self, job_title: str, job_employer: str, job_location: str) -> int | None:
+        """Retrieve job ID based on title, employer, and location"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT job_id FROM jobs 
+                    WHERE job_title = %s AND job_employer = %s AND job_location = %s
+                """, (job_title, job_employer, job_location))
+                result = cursor.fetchone()
+                return result[0] if result else None
+
 
 
     def get_model_path(self, user_id: int) -> str | None:

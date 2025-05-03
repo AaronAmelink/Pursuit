@@ -1,4 +1,3 @@
-from src.Model.Model import LikeModel
 from src.database.DatabaseHandler import DatabaseHandler
 from src.Controller.UserController import UserController
 from src.Controller.JobController import JobController
@@ -11,8 +10,7 @@ class App:
             user="your_user",
             password="your_password"
         )
-        self.model = LikeModel()
         self.auth = UserController(self.db)
-        self.jobs = JobController(self.db, self.auth, self.model)
+        self.jobs = JobController(self.db, self.auth)
 
 app = App()
