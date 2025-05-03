@@ -2,6 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 from datetime import datetime
 from typing import Dict
+import os
 
 class DatabaseHandler:
     def __init__(self, host: str, database: str, user: str, password: str):
@@ -36,6 +37,7 @@ class DatabaseHandler:
                         user_password VARCHAR(255) NOT NULL,
                         preferred_title VARCHAR(255),
                         preferred_location VARCHAR(255),
+                        model_path VARCHAR(512),
                         creation_time DATETIME NOT NULL
                     )
                 """)
@@ -76,14 +78,17 @@ class DatabaseHandler:
                 return cursor.fetchone() is not None
 
     def create_user(self, username: str, password: str) -> int | None:
-        """Create new user and return user_id"""
+        """Create new user and return user_id with default model path"""
         try:
+            model_path = os.path.abspath("models/default_model.pkl")
+            
             with self._get_connection() as conn:
                 with conn.cursor() as cursor:
                     cursor.execute("""
-                        INSERT INTO USERS (username, user_password, creation_time)
-                        VALUES (%s, %s, %s)
-                    """, (username, password, datetime.now()))
+                        INSERT INTO USERS 
+                        (username, user_password, model_path, creation_time)
+                        VALUES (%s, %s, %s, %s)
+                    """, (username, password, model_path, datetime.now()))
                     conn.commit()
                     return cursor.lastrowid
         except Error as e:
@@ -163,3 +168,29 @@ class DatabaseHandler:
                 """, (job_title, job_employer, job_location, job_url))
                 conn.commit()
                 return cursor.lastrowid
+
+
+
+    def get_model_path(self, user_id: int) -> str | None:
+        """Retrieve the stored model path for a user"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    SELECT model_path FROM USERS 
+                    WHERE user_id = %s
+                """, (user_id,))
+                result = cursor.fetchone()
+                return result[0] if result else None
+    
+    def verify_model_path(self, user_id: int) -> bool:
+        """
+        Verify the model file exists at the stored path.
+        Returns True if valid, False if missing or no user.
+        """
+        path = self.get_model_path(user_id)
+        if not path:
+            return False
+        
+        return os.path.isfile(path)
+    
+
