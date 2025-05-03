@@ -99,7 +99,12 @@ class Job:
         self.keywords = []
 
 
-    def get_keywords(self, model="HUGGINGFACE"):
+    def get_keywords(self, model="HUGGINGFACE") -> list:
+        """
+        Get keywords from the job description using different models.
+        :param model: Model to use for keyword extraction. Options are "YAKE", "HUGGINGFACE", "SPACY".
+        :return: List of keywords extracted from the job description.
+        """
         if (model == "YAKE"):
             kw_extractor = yake.KeywordExtractor()
             self.keywords = kw_extractor.extract_keywords(self.job_description)
@@ -111,7 +116,15 @@ class Job:
 
         return list(set(self.keywords))
 
-def get_jobs(job_title, job_location, number_of_results=20, hours_old=72):
+def get_jobs(job_title: str, job_location: str, number_of_results=20, hours_old=72) -> list:
+    """
+    Get a list of job instances based on the job title and location.
+    :param job_title: Title of the job to search for.
+    :param job_location: Location to search for the job.
+    :param number_of_results: Number of job results to return.
+    :param hours_old: Number of hours old the job postings should be.
+    :return: List of job instances.
+    """
     jobs = scrape_jobs(
         site_name=["indeed"],
         search_term=job_title,
