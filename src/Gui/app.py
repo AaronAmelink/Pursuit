@@ -14,3 +14,5 @@ class App:
         self.model = LikeModel()
         self.auth = UserController(self.db)
         self.jobs = JobController(self.db, self.auth, self.model)
+
+app = App()
