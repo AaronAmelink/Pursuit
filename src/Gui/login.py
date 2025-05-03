@@ -3,39 +3,33 @@ from nicegui.events import KeyEventArguments
 
 import sys
 import os
-
-
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
-
 import main_page
-
 from src.Gui.app import app
-# Add the root directory to the Python module search path
-
 from src.Controller.UserController import UserController
 
 
-
+# -------------------- LANDING PAGE --------------------
 @ui.page('/')
 def first():
     ui.page_title('Pursuit - Swipe into something better!')
     ui.add_head_html('<style>body {background: linear-gradient(135deg, #ffffff, #9c9a9a);}</style>')
-    
 
     def to_login():
         ui.navigate.to('/login')
     def to_singin():
         ui.navigate.to('/signin')
 
-    with ui.column().classes('absolute-center shadow-lg rounded-2xl p-6'):
-        ui.image('./src/Gui/icons/logo.png').style('width: 120vph; height: 40vph;')  # Increased size
-        ui.label('"Swipe Into Something Better."').style('font-size: 20px; font-weight: bold; font-style: italic;')  # Increased font size
-        with ui.row().style('gap: 20px;'):  # Added spacing between buttons
-            ui.button('Log in', on_click=to_login).style('font-size: 20px; padding: 15px 30px;')  # Increased button size
-            ui.button('Sign Up', on_click=to_singin).style('font-size: 20px; padding: 15px 30px;')  # Increased button size
-    
+    with ui.column().classes('absolute-center shadow-lg rounded-2xl p-6').style('background-color: white;'):
+        ui.image('./src/Gui/icons/logo.png').style('width: 120vph; height: 40vph;')
+        ui.label('"Swipe Into Something Better."').style('font-size: 20px; font-weight: bold; font-style: italic;')
+        with ui.row().style('gap: 20px;'):
+            ui.button('Log in', on_click=to_login).style('font-size: 20px; padding: 15px 30px;')
+            ui.button('Sign Up', on_click=to_singin).style('font-size: 20px; padding: 15px 30px;')
 
+
+# -------------------- LOGIN PAGE --------------------
 @ui.page('/login')
 def login():
     ui.page_title('Pursuit - Swipe into something better!')
@@ -47,13 +41,14 @@ def login():
             ui.navigate.to('/main')
         else:
             ui.notify('Incorrect username or password', color='negative')
-            
-    
-    with ui.card().classes('absolute-center'):
+
+    with ui.card().classes('absolute-center shadow-lg rounded-2xl p-6').style('background-color: white; width: 400px;'):
         username = ui.input('Username')
         password = ui.input('Password', password=True, password_toggle_button=True)
         ui.button('Log in', on_click=check_login)
 
+
+# -------------------- SIGNUP PAGE --------------------
 @ui.page('/signin')
 def signin():
     ui.page_title('Pursuit - Swipe into something better!')
@@ -65,10 +60,10 @@ def signin():
             ui.navigate.to('/main')
         else:
             ui.notify('Username in use', color='negative')
-    
-    with ui.stepper().props('vertical').classes('w-full').style('width: 480px; height: 480px;').classes('absolute-center') as stepper:
+
+    with ui.stepper().props('vertical').classes('absolute-center shadow-lg rounded-2xl p-6').style('background-color: white; width: 480px; height: 480px;') as stepper:
         with ui.step('Title'):
-            ui.label('Please enter prefered title:')
+            ui.label('Please enter preferred title:')
             ui.input('Title')
             with ui.stepper_navigation():
                 ui.button('Next', on_click=stepper.next)
@@ -78,7 +73,6 @@ def signin():
             with ui.stepper_navigation():
                 ui.button('Next', on_click=stepper.next)
                 ui.button('Back', on_click=stepper.previous).props('flat')
-
         with ui.step('Credentials'):
             ui.label('Please enter your future credentials')
             username = ui.input('Username')
