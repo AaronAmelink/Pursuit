@@ -4,8 +4,13 @@ from nicegui.events import KeyEventArguments
 import sys
 import os
 
-# Add the root directory to the Python module search path
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+
+import main_page
+
+# Add the root directory to the Python module search path
 
 from nicegui import app, ui
 from src.Controller.UserController import UserController
