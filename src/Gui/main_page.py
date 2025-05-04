@@ -110,7 +110,6 @@ def main_page():
     # -------------------- Trigger Animations on Load --------------------
     ui.run_javascript('''
         setTimeout(() => document.getElementById('top-bar')?.classList.add('animate'), 100);
-        setTimeout(() => document.getElementById('logo')?.classList.add('bounce-in'), 300);
         setTimeout(() => document.getElementById('swipe-card')?.classList.add('animate'), 500);
         setTimeout(() => document.getElementById('action-buttons')?.classList.add('animate'), 700);
     ''')
@@ -266,9 +265,11 @@ def main_page():
 
     # -------------------- Main Swipe Card --------------------
     with ui.card().props('id=swipe-card').style('position: absolute; left: 50%; top: 45%; transform: translate(-50%, -50%); width: 480px; height: 600px; border-radius: 40px; background-color: white; box-shadow: 0 10px 25px rgba(0,0,0,0.2);'):
-        with ui.row():
+        with ui.row().style('align-items: center;'):
             ui.icon('work', color='primary').classes('text-4xl')
-            title = ui.label('Title').classes('text-3xl')
+            title = ui.label('Title').classes('text-4xl').style('margin-left: 10px; width: 100%;')
+            
+            
         ui.space()
         with ui.row():
             ui.icon('description', color='primary').classes('text-4xl')
@@ -318,7 +319,7 @@ def main_page():
         ui.space()
 
         # Scrollable container with consistent-sized cards
-        with ui.scroll_area().style('width: 100%; height: 500px; border: 1px solid #ccc; padding: 10px;'):
+        with ui.scroll_area().style('width: 100%; height: 80vh; border: 1px solid #ccc; padding: 10px;'):
             liked_jobs_column = ui.column().style('gap: 10px;')
 
         ui.space()
@@ -332,11 +333,17 @@ def main_page():
         liked_jobs_column.clear()
         for job in jc.get_liked():
             with liked_jobs_column:
-                with ui.card().style('padding: 10px; height: 20vh; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;'):
+                with ui.card().style('padding: 10px; height: 25vh; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;'):
                     ui.label(f"🔹 {job['job_title']}").classes('text-xl font-bold')
                     ui.label(f"🏢 {job['job_employer']}").classes('text-md')
                     ui.label(f"📍 {job['job_location']}").classes('text-md')
                     ui.link('🔗 View Posting', job['job_url']).classes('text-blue-500 underline')
+                    ui.button('X', on_click=lambda job=job: remove_liked_job(job)).props('color=red flat size=sm').style('align-self: flex-end; padding: 5px; min-width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: absolute; top: 5px; right: 5px;')
+
+    def remove_liked_job(job):
+        jc.remove_like(job['job_url'])
+        load_liked_jobs()
+        ui.notify(f"Removed {job['job_title']} from liked jobs", color='negative')
 
 
      # -------------------- Gemini Chat Drawer --------------------

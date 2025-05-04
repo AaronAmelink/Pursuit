@@ -155,6 +155,17 @@ class DatabaseHandler:
                 """, (user_id, job_title, job_employer, job_location, job_url))
                 conn.commit()
 
+    def remove_like(self, user_id: int, job_url: str) -> None:
+        """Removes a like from the database based on job_url"""
+        with self._get_connection() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    DELETE FROM LIKES 
+                    WHERE user_id = %s AND job_url = %s
+                """, (user_id, job_url))
+                conn.commit()
+
+
 
     def get_model_path(self, user_id: int) -> str | None:
         """Retrieve the stored model path for a user"""

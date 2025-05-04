@@ -26,6 +26,14 @@ class JobController:
         if self._liked_jobs_cache is None:
             self._refresh_liked_cache()
         return self._liked_jobs_cache
+    
+    def remove_like(self, job_url: str) -> None:
+        if self.user is None or self.user.user_id is None:
+            raise ValueError("No authenticated user")
+        """Removes a like and updates cache"""
+        self.db.remove_like(self.user.user_id, job_url)
+        self._liked_jobs_cache = [job for job in self._liked_jobs_cache if job["job_url"] != job_url]
+
 
     def record_like(self, swipe_label: bool, job_title, job_employer, job_location,  job_url) -> None:
         """Records a like and updates cache"""
