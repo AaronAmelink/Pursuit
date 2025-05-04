@@ -156,6 +156,33 @@ def main_page():
                     await handle_left()
                     await move_panel('right', new_job_task)
 
+    async def handle_left_button():
+        async with key_handling_lock:  # Ensure only one key event is processed at a time
+                jc.record_like(
+                    False,
+                    jc.model.current_job.job_title,
+                    jc.model.current_job.job_employer,
+                    jc.model.current_job.job_location,
+                    jc.model.current_job.job_url
+                )
+                new_job_task = asyncio.create_task(asyncio.to_thread(jc.get_job))
+                await handle_right()
+                await move_panel('left', new_job_task)
+
+    async def handle_right_button():
+        async with key_handling_lock:
+            jc.record_like(
+                True,
+                jc.model.current_job.job_title,
+                jc.model.current_job.job_employer,
+                jc.model.current_job.job_location,
+                jc.model.current_job.job_url
+            )
+            new_job_task = asyncio.create_task(asyncio.to_thread(jc.get_job))
+            await handle_left()
+            await move_panel('right', new_job_task)
+
+
     ui.keyboard(on_key=handle_key)
 
     async def move_panel(direction, new_job_task=None):
@@ -281,10 +308,13 @@ def main_page():
         'position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); '
         'width: 550px; height: 100px; background: none; box-shadow: none; border: none;'
     )
+        
+
     with buttons:
         with ui.row().style('margin: 0 auto; justify-content: center; gap: 15vw;'):
-            ui.button(icon='thumb_down', on_click=handle_right).props('color=red icon-color=white round size=xl')
-            ui.button(icon='thumb_up', on_click=handle_left).props('color=green icon-color=white round size=xl')
+            ui.button(icon='thumb_down', on_click=handle_left_button).props('color=red icon-color=white round size=xl')
+            ui.button(icon='thumb_up', on_click=handle_right_button).props('color=green icon-color=white round size=xl')
+
 
 
     # -------------------- Liked Jobs Drawer --------------------
