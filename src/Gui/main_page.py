@@ -255,15 +255,7 @@ def main_page():
         with ui.button(icon='menu'):
             with ui.menu() as menu:
                 ui.menu_item('Sign out', on_click=lambda: ui.navigate.to('/'))
-                ui.menu_item('Reset', lambda: ui.run_javascript("""
-                    const panel = document.getElementById('swipe-card');
-                    panel.style.transition = 'none';
-                    panel.style.transform = 'translate(-50%, -50%) scale(1)';
-                    panel.style.opacity = '1';
-                    setTimeout(() => { panel.style.transition = 'transform 0.5s ease, opacity 0.5s ease'; }, 10);
-                """))
                 ui.menu_item('Exit', on_click=lambda: (ui.run_javascript("window.location.href = 'about:blank';"), app.shutdown()))
-                ui.menu_item('Close', menu.close)
         ui.image('./src/Gui/icons/logo.png').props('id=logo').style('width: 90px; height: 30px;')
         ui.space()
         ui.button('Open Chat', on_click=open_chat)
