@@ -5,6 +5,8 @@ import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
+import main_page
+
 from src.Gui.app import app
 from src.Controller.UserController import UserController
 
